@@ -1,0 +1,57 @@
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>insert</title>
+    <script src="~/scripts/jquery-1.10.2.js"></script>
+    <script src="~/scripts/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript">
+        function myFunction() {
+            $(document).ready(function () {
+                var name1 = $("#name").val();
+                var city1 = $("#city").val();
+                alert(name1 + city1);
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/InsertPost",//controller/action
+                    data: {name:name1,city:city1},
+                    success: function (response) {
+                        if (response.id == 1) {
+                            location.reload();
+                        }
+                        else if (response.id == 404) {
+                            alert("error");
+                        }
+                    },
+                    failure: function (response) {
+                        alert("Process failed!! Please try again.");
+                    },
+                    error: function (response) {
+                        alert("Error!! Sorry for your inconvinience.");
+                    }
+                });
+            })
+        }
+    </script>
+</head>
+<body>
+    <div> 
+        <label>Name</label>
+        <input type="text" id="name" /><br />
+
+     </div>
+    <div>
+        <label>City</label>
+        <input type="text" id="city" />
+    </div>
+    <div>
+        <input type="button" id="insert" value="insert" onclick="myFunction()"/>
+    </div>
+</body>
+</html>
