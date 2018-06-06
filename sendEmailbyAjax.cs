@@ -1,51 +1,64 @@
-  public JsonResult ForgotPasswordSend(string emailId)
-        {
-            int emailValidFlag = 0, employeeId;
+//call sendfunction
+SendEmail("sanal@nuvento.com", "", "", "Request For Shift Changing", "Hi, <br/>&nbsp;&nbsp;&nbsp; To approve shift use this link  " +
+                                      msgBody);      
 
-            string employeePassword, employeeName;
+public bool SendEmail(string ToAddress, string CcAddress, string BccAddress, string Subject, string MessageBody)
+        {
+            MailAddress email;
+            string[] AddressArray;
             try
             {
-                ETLLoginService.ETLCenterLoginService obj = new ETLLoginService.ETLCenterLoginService();
-                string passwordDetails = obj.forgetPassword(emailId);
-
-                DataTable dt = JsonConvert.DeserializeObject<DataTable>(passwordDetails);
-                if (dt.Rows.Count > 0)
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress("sanal@nuvento.com");
+                if (ToAddress != string.Empty)
                 {
-                    employeePassword = Convert.ToString(dt.Rows[0]["EmpPassword"]);
-                    employeeId = Convert.ToInt32(dt.Rows[0]["ID_Employee"]);
-                    employeeName = Convert.ToString(dt.Rows[0]["EmpName"]);
-                    MailMessage msg = new MailMessage();
-                    msg.From = new MailAddress("aaaaaa@gmail.com");
-                    msg.To.Add(emailId);
-                    msg.Subject = "Recover your Password";
-                    msg.Body = ("Hi <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + employeeName + " your password is <b>" + employeePassword + "</b>");
-                    msg.IsBodyHtml = true;
-
-                    SmtpClient smtc = new SmtpClient();
-                    smtc.Host = "smtp.gmail.com";
-                    System.Net.NetworkCredential ntwd = new NetworkCredential();
-                    ntwd.UserName = "aaaaaa@gmail.com";
-                    ntwd.Password = "aaaaa";
-                    smtc.UseDefaultCredentials = true;
-                    smtc.Credentials = ntwd;
-                    smtc.Port = 587;
-                    smtc.EnableSsl = true;
-                    smtc.Send(msg);
+                    AddressArray = ToAddress.Split(',');
+                    foreach (string item in AddressArray)
+                    {
+                        email = new MailAddress(item);
+                        if (!mail.To.Contains(email))
+                            mail.To.Add(item);
+                    }
                 }
-                else
+                if (CcAddress != string.Empty)
                 {
-                    emailValidFlag = 1;
+                    AddressArray = CcAddress.Split(',');
+                    foreach (string item in AddressArray)
+                    {
+                        email = new MailAddress(item);
+                        if (!mail.CC.Contains(email))
+                            mail.CC.Add(item);
+                    }
                 }
-                return Json(new { id = emailValidFlag }, JsonRequestBehavior.AllowGet);
-
-
+                if (BccAddress != string.Empty)
+                {
+                    AddressArray = BccAddress.Split(',');
+                    foreach (string item in AddressArray)
+                    {
+                        email = new MailAddress(item);
+                        if (!mail.Bcc.Contains(email))
+                            mail.Bcc.Add(item);
+                    }
+                }
+                mail.Subject = Subject;
+                mail.Body = MessageBody + "<br/><br/>Thanks,<br/>SmartSheet";
+                mail.IsBodyHtml = true;
+                SmtpClient smtp = new SmtpClient();
+                smtp.Host = "smtp.gmail.com";
+                smtp.Port = 587;
+                smtp.Credentials = new System.Net.NetworkCredential("sanal@nuvento.com", "****");
+                smtp.EnableSsl = true;
+                smtp.Send(mail);
+                return true;
             }
             catch (Exception ex)
             {
-                throw ex;
+
+                return false;
             }
             finally
             {
-                Dispose();
+                AddressArray = null;
+                email = null;
             }
         }
